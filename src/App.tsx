@@ -29,7 +29,6 @@ function App() {
 	}
 
 	function download(index: number) {
-		//@ts-ignore
 		invoke('download_files', {
 			topic: completions[index].item.topic,
 			encodedTopic: encodeURI(completions[index].item.topic),
@@ -59,7 +58,6 @@ function App() {
 					{completions.length > 1 ? (
 						<div className={'bg-[#222] w-full text-sm p-3 mt-2 rounded-md focus:outline-none border-2 border-[#1E1E1E]'}>
 							{completions.map((completion, index) => (
-								// @ts-ignore
 								<div className={'cursor-pointer'} onClick={() => download(index)}>
 									{completion.item.topic}
 								</div>
