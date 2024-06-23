@@ -1,4 +1,4 @@
-  {
+{
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
@@ -7,8 +7,14 @@
   ],
   "permissions": [
     {
-      "identifier": "fs:allow-home-read-recursive",
-      "allow": [{ "path": "HOME/.vxfetch/*" }]
+      "identifier": "fs:read-all",
+      "allow": [{
+        "path": "$HOME/.vxfetch/"
+      },
+        {
+          "path": "$HOME/.vxfetch/**"
+        }
+      ]
     }
   ]
 }
