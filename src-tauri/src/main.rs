@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
 use tauri::{AppHandle, Manager};
@@ -23,9 +24,18 @@ async fn download_files(app_handle: tauri::AppHandle, topic: String, encoded_top
     .await
     .unwrap();
     let buffer = request.bytes().await.unwrap();
-    let mut file =
-        std::fs::File::create(format!("{}{}.zip", get_storage_folder(app_handle), topic)).unwrap();
+    let file_path = format!("{}{}.zip", get_storage_folder(app_handle), topic);
+    let mut file = std::fs::File::create(&file_path).unwrap();
     let _ = file.write(&*buffer);
+
+    let opened_file = File::open(&file_path).expect("could not open zip file");
+
+    let mut zip = zip::ZipArchive::new(opened_file).expect("invalid zip"); //will never happen
+    let __ = zip
+        .extract(&file_path.replace(".zip", ""))
+        .expect("could not extract zip");
+    // clean up
+    fs::remove_file(&file_path).expect("could not clean up");
 }
 
 fn get_storage_folder(app_handle: AppHandle) -> String {
