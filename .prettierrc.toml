@@ -1,0 +1,10 @@
+tabWidth = 4
+useTabs = true
+semi = false
+singleQuote = true
+printWidth = 150
+trailingComma = "all"
+quoteProps = "as-needed"
+bracketSpacing = true
+bracketSameLine = true
+proseWrap = "preserve"

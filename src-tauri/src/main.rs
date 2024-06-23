@@ -22,14 +22,29 @@ fn main() {
 #[tauri::command]
 async fn download_files(app_handle: tauri::AppHandle, topic: String, encoded_topic: String) {
     //topic needs to be already encoded in uri format from js layer
-    let request = reqwest::get(format!("http://localhost:3000/download?topic={}", encoded_topic)).await.unwrap();
+    let request = reqwest::get(format!(
+        "http://localhost:3000/download?topic={}",
+        encoded_topic
+    ))
+    .await
+    .unwrap();
     let buffer = request.bytes().await.unwrap();
-    let mut file = std::fs::File::create(format!("{}{}.zip", get_storage_folder(app_handle), topic)).unwrap();
+    let mut file =
+        std::fs::File::create(format!("{}{}.zip", get_storage_folder(app_handle), topic)).unwrap();
     let _ = file.write(&*buffer);
 }
 
 fn get_storage_folder(app_handle: AppHandle) -> String {
-    let storage_path = format!("{}/.vxfetch/", app_handle.path().home_dir().unwrap().to_str().unwrap().to_string());
+    let storage_path = format!(
+        "{}/.vxfetch/",
+        app_handle
+            .path()
+            .home_dir()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string()
+    );
     match Path::new(storage_path.clone().as_str()).try_exists() {
         Ok(r) => {
             if r {
@@ -39,10 +54,9 @@ fn get_storage_folder(app_handle: AppHandle) -> String {
                 storage_path
             }
         }
-        Err(err) => {println!("{}", err);
+        Err(err) => {
+            println!("{}", err);
             "".parse().unwrap()
         }
     }
-
-
 }
