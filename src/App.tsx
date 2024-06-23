@@ -13,9 +13,10 @@ interface Topic {
 
 function App() {
 	const [completions, setCompletions] = useState<Topic[]>([])
+	const [value, setValue] = useState('')
 
 	function onChange(e: ChangeEvent<HTMLInputElement>) {
-		let value = e.target.value
+		setValue(e.target.value)
 		if (value.length < 3) {
 			setCompletions([])
 			return
@@ -29,9 +30,12 @@ function App() {
 	}
 
 	function download(index: number) {
+		let topic = completions[index].item.topic
+		setCompletions([])
+		setValue('')
 		invoke('download_files', {
-			topic: completions[index].item.topic,
-			encodedTopic: encodeURI(completions[index].item.topic),
+			topic: topic,
+			encodedTopic: encodeURI(topic),
 		})
 	}
 
@@ -52,6 +56,7 @@ function App() {
 					<input
 						onChange={onChange}
 						type={'text'}
+						value={value}
 						className={'bg-[#222] w-full text-xl p-3 rounded-md focus:outline-none border-2 border-[#1E1E1E]'}
 						placeholder={'search vx-underground'}
 					/>
