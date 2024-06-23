@@ -8,6 +8,7 @@ use tauri::{AppHandle, Manager};
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![download_files])
         .run(tauri::generate_context!())
