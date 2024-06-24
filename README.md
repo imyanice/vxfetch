@@ -5,6 +5,7 @@ a tiny gui application made for enhancing ux while browsing vx-undergound's libr
 ## download
 https://github.com/imyanice/vxfetch/releases/latest
 
+> you also need vxfetch-api: https://github.com/imyanice/vxfetch-api/
 ## license
 vxfetch is licensed under GPLv3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
