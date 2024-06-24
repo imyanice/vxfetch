@@ -1,7 +1,13 @@
-# Tauri + React + Typescript
+# vxfetch
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+a tiny gui application made for enhancing ux while browsing vx-undergound's library
 
-## Recommended IDE Setup
+## download
+https://github.com/imyanice/vxfetch/releases/latest
 
--   [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## license
+vxfetch is licensed under GPLv3.0: https://www.gnu.org/licenses/gpl-3.0.txt
+
+## donation
+you like this project? don't hesitate to donate some xmr!
+`88bK7ompWH5FGSKqbkViwxNifJcv28DrGd8DceiUsNUJJ912PgECVpgRtVPwCJEMj3XMLVAh35vRgezvAnNvk3YLK8MGLFP`
