@@ -18,7 +18,7 @@ fn main() {
 
 #[tauri::command]
 async fn open_file(app_handle: tauri::AppHandle, file: String) {
-    open::that(format!("{}{}", get_storage_folder(app_handle), file));
+    let _ = open::that(format!("{}{}", get_storage_folder(app_handle), file));
 }
 
 #[tauri::command]
@@ -33,13 +33,12 @@ async fn download_files(app_handle: tauri::AppHandle, topic: String, encoded_top
     let buffer = request.bytes().await.unwrap();
     let file_path = format!("{}{}.zip", get_storage_folder(app_handle), topic);
     let mut file = std::fs::File::create(&file_path).unwrap();
-    let _ = file.write(&*buffer);
+    let _ = file.write(&buffer);
 
     let opened_file = File::open(&file_path).expect("could not open zip file");
 
     let mut zip = zip::ZipArchive::new(opened_file).expect("invalid zip"); //will never happen
-    let __ = zip
-        .extract(&file_path.replace(".zip", ""))
+    zip.extract(&file_path.replace(".zip", ""))
         .expect("could not extract zip");
     // clean up
     fs::remove_file(&file_path).expect("could not clean up");
@@ -48,13 +47,7 @@ async fn download_files(app_handle: tauri::AppHandle, topic: String, encoded_top
 fn get_storage_folder(app_handle: AppHandle) -> String {
     let storage_path = format!(
         "{}/.vxfetch/",
-        app_handle
-            .path()
-            .home_dir()
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string()
+        app_handle.path().home_dir().unwrap().to_str().unwrap()
     );
     match Path::new(storage_path.clone().as_str()).try_exists() {
         Ok(r) => {
