@@ -17,6 +17,8 @@
         }
       ]
     },
-    "os:allow-family"
+    "os:allow-family",
+    "menu:allow-new",
+    "menu:allow-popup"
   ]
 }

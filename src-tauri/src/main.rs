@@ -11,13 +11,14 @@ fn main() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![download_files, open_file])
+        .invoke_handler(tauri::generate_handler![download_files, open_file, delete_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
 #[tauri::command]
 async fn open_file(app_handle: tauri::AppHandle, file: String) {
+	println!("{}{}", get_storage_folder(app_handle.clone()), &file);
     let _ = open::that(format!("{}{}", get_storage_folder(app_handle), file));
 }
 
@@ -41,7 +42,18 @@ async fn download_files(app_handle: tauri::AppHandle, topic: String, encoded_top
     zip.extract(&file_path.replace(".zip", ""))
         .expect("could not extract zip");
     // clean up
-    fs::remove_file(&file_path).expect("could not clean up");
+
+    fs::remove_file(&file_path);
+}
+
+#[tauri::command]
+fn delete_file(app_handle: tauri::AppHandle, file_path: String) {
+	println!("hi");
+	let file = format!("{}{}", get_storage_folder(app_handle), file_path);
+	match fs::remove_dir_all(&file) {
+		Ok(_) => {println!("done");}
+		Err(_) => {fs::remove_file(&file);}
+	}
 }
 
 fn get_storage_folder(app_handle: AppHandle) -> String {

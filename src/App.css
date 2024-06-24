@@ -17,9 +17,9 @@ body {
 	font-family: '0xProto', sans-serif;
 	color: #383838;
 	background-color: #111;
-	background-image: url('./assets/libraryImage.png');
-	background-size: 150px;
-	background-repeat: no-repeat;
-	background-position-x: center;
-	background-position-y: center;
+	/*background-image: url('./assets/libraryImage.png');*/
+	/*background-size: 150px;*/
+	/*background-repeat: no-repeat;*/
+	/*background-position-x: center;*/
+	/*background-position-y: center;*/
 }
