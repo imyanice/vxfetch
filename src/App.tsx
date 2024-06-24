@@ -146,7 +146,7 @@ function App() {
 										console.log(currentDir.replace('.vxfetch/', ''))
 										invoke('open_file', { file: currentDir.replace('.vxfetch/', '').replaceAll('/', slash) + slash + file.name })
 									}}>
-									<img src={file.isDir ? folderImage : fileImage} className={'w-44'} alt={'folder icon'} />
+									<img draggable={false} src={file.isDir ? folderImage : fileImage} className={'w-44'} alt={'folder icon'} />
 									<span className={'text-center'}>
 										{file.name.includes(' ') ? file.name : file.name.length > 15 ? file.name.substring(0, 15) + '...' : file.name}
 									</span>
