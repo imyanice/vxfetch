@@ -19,3 +19,4 @@ reqwest = { version = "0.12.5", features = ["blocking"] }
 zip = "2.1.3"
 tauri-plugin-fs = "2.0.0-beta.9"
 open = "5.1.4"
+tauri-plugin-os = "2.0.0-beta.6"

@@ -8,6 +8,7 @@ use tauri::{AppHandle, Manager};
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![download_files, open_file])
@@ -17,7 +18,7 @@ fn main() {
 
 #[tauri::command]
 async fn open_file(app_handle: tauri::AppHandle, file: String) {
-	open::that(format!("{}{}", get_storage_folder(app_handle), file));
+    open::that(format!("{}{}", get_storage_folder(app_handle), file));
 }
 
 #[tauri::command]

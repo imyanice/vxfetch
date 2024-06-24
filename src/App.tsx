@@ -5,6 +5,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { BaseDirectory, readDir } from '@tauri-apps/plugin-fs'
 import folderImage from './assets/folder.svg'
 import fileImage from "./assets/fileImage.png"
+import { family, platform } from '@tauri-apps/plugin-os'
 
 interface Topic {
 	item: {
@@ -25,7 +26,7 @@ function App() {
 	const [ files, setFiles ] = useState<File[]>([])
 	const [ currentDir, setCurrentDir ] = useState(".vxfetch/")
 	const [ tasks, setTasks ] = useState<string[]>([])
-	
+	let slash: "/" | "\\" ="/"
 	function onChange(e: ChangeEvent<HTMLInputElement>) {
 		setValue(e.target.value)
 		if (value.length < 3) {
@@ -50,7 +51,7 @@ function App() {
 			encodedTopic: encodeURI(topic),
 		}).then(() => {
 			try {
-				readDir(currentDir, { baseDir: BaseDirectory.Home }).then((dir) => {
+				readDir(currentDir.replaceAll("/", slash), { baseDir: BaseDirectory.Home }).then((dir) => {
 					let newFiles = dir.map((entry) => ({
 						name: entry.name,
 						isDir: entry.isDirectory,
@@ -67,12 +68,13 @@ function App() {
 	}
 
 	useEffect(() => {
+		family().then((a) => slash = a == "unix" ? "/" : "\\");
 		setCurrentDir('.vxfetch/')
 	}, [])
 
 	useEffect(() => {
 		try {
-			readDir(currentDir, { baseDir: BaseDirectory.Home }).then((dir) => {
+			readDir(currentDir.replaceAll("/", slash), { baseDir: BaseDirectory.Home }).then((dir) => {
 				let newFiles = dir.map((entry) => ({
 					name: entry.name,
 					isDir: entry.isDirectory,
@@ -132,7 +134,7 @@ function App() {
 										return
 									}
 									console.log(currentDir.replace('.vxfetch/', ''))
-									invoke('open_file', { file: currentDir.replace('.vxfetch/', '') + '/' + file.name })
+									invoke('open_file', { file: currentDir.replace('.vxfetch/', '').replaceAll("/", slash) + slash + file.name })
 								} }>
 									<img src={ file.isDir ? folderImage : fileImage } className={ 'w-44' } alt={ 'folder icon' }/>
 									<span className={ 'text-center' }>{ file.name.includes(' ') ? file.name :

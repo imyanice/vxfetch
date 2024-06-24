@@ -8,13 +8,15 @@
   "permissions": [
     {
       "identifier": "fs:read-all",
-      "allow": [{
-        "path": "$HOME/.vxfetch/"
-      },
+      "allow": [
+        {
+          "path": "$HOME/.vxfetch/"
+        },
         {
           "path": "$HOME/.vxfetch/**"
         }
       ]
-    }
+    },
+    "os:allow-family"
   ]
 }
