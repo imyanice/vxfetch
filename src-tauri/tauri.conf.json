@@ -14,7 +14,8 @@
 			{
 				"title": "vxfetch",
 				"width": 1282,
-				"height": 760
+				"height": 760,
+				"zoomHotkeysEnabled": true
 			}
 		],
 		"security": {

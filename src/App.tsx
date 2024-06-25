@@ -48,48 +48,6 @@ function App() {
 		)
 	}
 
-	useEffect(() => {
-		const handleKeyDown = (event) => {
-			if (event.ctrlKey || event.metaKey) {
-				window.addEventListener('wheel', handleWheel, { passive: false });
-			}
-		};
-
-		const handleKeyUp = (event) => {
-			if (!event.ctrlKey && !event.metaKey) {
-				window.removeEventListener('wheel', handleWheel);
-			}
-		};
-
-		const handleWheel = (event) => {
-			event.preventDefault();
-			const delta = Math.sign(event.deltaY);
-
-			if (delta !== 0) {
-				let newZoom = zoom;
-
-				if (delta === -1 && zoom < 2) {
-					newZoom = Math.min(zoom + 0.1, 2);
-				} else if (delta === 1 && zoom > 0.1) {
-					newZoom = Math.max(zoom - 0.1, 0.1);
-				}
-
-				setZoom(newZoom);
-				getCurrent().setZoom(newZoom)
-			}
-		};
-
-		window.addEventListener('keydown', handleKeyDown);
-		window.addEventListener('keyup', handleKeyUp);
-
-		return () => {
-			window.removeEventListener('keydown', handleKeyDown);
-			window.removeEventListener('keyup', handleKeyUp);
-			window.removeEventListener('wheel', handleWheel);
-		};
-	}, [zoom]);
-
-
 	function download(index: number) {
 		let topic = completions[index].item.topic
 		setCompletions([])
