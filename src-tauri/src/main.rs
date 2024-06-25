@@ -8,17 +8,22 @@ use tauri::{AppHandle, Manager};
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![download_files, open_file, delete_file])
+        .invoke_handler(tauri::generate_handler![
+            download_files,
+            open_file,
+            delete_file
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
 #[tauri::command]
 async fn open_file(app_handle: tauri::AppHandle, file: String) {
-	println!("{}{}", get_storage_folder(app_handle.clone()), &file);
+    println!("{}{}", get_storage_folder(app_handle.clone()), &file);
     let _ = open::that(format!("{}{}", get_storage_folder(app_handle), file));
 }
 
@@ -48,12 +53,14 @@ async fn download_files(app_handle: tauri::AppHandle, topic: String, encoded_top
 
 #[tauri::command]
 fn delete_file(app_handle: tauri::AppHandle, file_path: String) {
-	let file = format!("{}{}", get_storage_folder(app_handle), file_path);
+    let file = format!("{}{}", get_storage_folder(app_handle), file_path);
 
-	match fs::remove_dir_all(&file) {
-		Ok(_) => {}
-		Err(_) => {let _ = fs::remove_file(file);}
-	}
+    match fs::remove_dir_all(&file) {
+        Ok(_) => {}
+        Err(_) => {
+            let _ = fs::remove_file(file);
+        }
+    }
 }
 
 fn get_storage_folder(app_handle: AppHandle) -> String {

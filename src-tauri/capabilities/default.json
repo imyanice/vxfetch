@@ -19,6 +19,9 @@
     },
     "os:allow-family",
     "menu:allow-new",
-    "menu:allow-popup"
+    "menu:allow-popup",
+    "webview:allow-set-webview-zoom",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-register-all"
   ]
 }
