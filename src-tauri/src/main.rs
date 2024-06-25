@@ -43,16 +43,16 @@ async fn download_files(app_handle: tauri::AppHandle, topic: String, encoded_top
         .expect("could not extract zip");
     // clean up
 
-    fs::remove_file(&file_path);
+    let _ = fs::remove_file(&file_path);
 }
 
 #[tauri::command]
 fn delete_file(app_handle: tauri::AppHandle, file_path: String) {
-	println!("hi");
 	let file = format!("{}{}", get_storage_folder(app_handle), file_path);
+
 	match fs::remove_dir_all(&file) {
-		Ok(_) => {println!("done");}
-		Err(_) => {fs::remove_file(&file);}
+		Ok(_) => {}
+		Err(_) => {let _ = fs::remove_file(file);}
 	}
 }
 
