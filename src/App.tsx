@@ -8,8 +8,6 @@ import fileImage from './assets/fileImage.png'
 import { family } from '@tauri-apps/plugin-os'
 import { Menu, MenuItem, PredefinedMenuItem } from '@tauri-apps/api/menu'
 import libraryImage from './assets/libraryImage.png'
-import { getCurrent } from '@tauri-apps/api/webview'
-import { register } from '@tauri-apps/plugin-global-shortcut'
 
 interface Topic {
 	item: {
@@ -31,7 +29,6 @@ function App() {
 	const [currentDir, setCurrentDir] = useState('.vxfetch/')
 	const [tasks, setTasks] = useState<string[]>([])
 	const [dummy, setDummy] = useState('')
-	const [zoom, setZoom] = useState(1)
 
 	let slash: '/' | '\\' = '/'
 	function onChange(e: ChangeEvent<HTMLInputElement>) {
@@ -79,7 +76,7 @@ function App() {
 	}, [])
 
 	useEffect(() => {
-		console.log(currentDir.replaceAll("vxfetch", "").replaceAll("/", ""))
+		console.log(currentDir.replaceAll('vxfetch', '').replaceAll('/', ''))
 		try {
 			readDir(currentDir.replaceAll('/', slash), { baseDir: BaseDirectory.Home }).then((dir) => {
 				let newFiles = dir.map((entry) => ({
@@ -100,52 +97,51 @@ function App() {
 				<div className="px-64">
 					<div className="relative pt-4 pb-8">
 						<input
-							autoFocus={ true }
-							onChange={ onChange }
+							autoFocus={true}
+							onChange={onChange}
 							type="text"
-							value={ value }
+							value={value}
 							className="bg-[#222] w-full text-xl p-3 rounded-xl focus:outline-none border-2 border-[#1E1E1E]"
 							placeholder="search vx-underground"
 						/>
-						{ completions.length > 1 ? (
+						{completions.length > 1 ? (
 							<div className="bg-[#222] w-full text-sm p-3 mt-2 rounded-md focus:outline-none border-2 border-[#1E1E1E] absolute z-10">
-								{ completions.map((completion, index) => (
-									<div className="cursor-pointer" onClick={ () => download(index) }>
-										{ completion.item.topic }
+								{completions.map((completion, index) => (
+									<div className="cursor-pointer" onClick={() => download(index)}>
+										{completion.item.topic}
 									</div>
-								)) }
+								))}
 							</div>
 						) : (
 							<></>
-						) }
+						)}
 					</div>
 				</div>
 				<div className="px-5">
-					{ files.length > 0 && currentDir.replaceAll("vxfetch", "").replaceAll("/", "").replaceAll(".", "") !== "" ? (
+					{files.length > 0 && currentDir.replaceAll('vxfetch', '').replaceAll('/', '').replaceAll('.', '') !== '' ? (
 						currentDir.split('/').map(
 							(path) =>
 								path !== '' && (
 									<button
 										className="pr-2"
-										onClick={ () => {
+										onClick={() => {
 											setCurrentDir((path == '.vxfetch/' || path == '.vxfetch' ? '' : currentDir.split(path)[0]) + path)
-										} }>
-										{ path == '' ? '' : path + '/' }
+										}}>
+										{path == '' ? '' : path + '/'}
 									</button>
 								),
 						)
 					) : (
 						<></>
-					) }
+					)}
 				</div>
-				<div
-					className="grid justify-center gap-2 2xl:grid-cols-7 xl:grid-cols-6 lg:grid-cols-5 md:grid-cols-4 grid-cols-2 sm:grid-cols-3 pt-3 px-5 z-0">
-					{ files.length > 0 ? (
+				<div className="grid justify-center gap-2 2xl:grid-cols-7 xl:grid-cols-6 lg:grid-cols-5 md:grid-cols-4 grid-cols-2 sm:grid-cols-3 pt-3 px-5 z-0">
+					{files.length > 0 ? (
 						files.map((file) =>
 							file.name !== '.DS_Store' && file.name !== 'config.toml' ? (
 								<div
 									className="items-center flex flex-col cursor-pointer text-center"
-									onContextMenu={ async (e: React.MouseEvent) => {
+									onContextMenu={async (e: React.MouseEvent) => {
 										e.preventDefault()
 										let filePath = currentDir.replaceAll('.vxfetch', '').replaceAll('/', slash) + slash + file.name
 										const menuItems = await Promise.all([
@@ -186,18 +182,17 @@ function App() {
 										})
 
 										await menu.popup()
-									} }
-									onClick={ () => {
+									}}
+									onClick={() => {
 										if (file.isDir) {
 											setCurrentDir(currentDir + slash + file.name)
 											return
 										}
 										invoke('open_file', { file: currentDir.replace('.vxfetch/', '').replaceAll('/', slash) + slash + file.name })
-									} }>
-									<img draggable={ false } src={ file.isDir ? folderImage : fileImage } className="w-32" alt="folder icon"/>
+									}}>
+									<img draggable={false} src={file.isDir ? folderImage : fileImage} className="w-32" alt="folder icon" />
 									<span className="text-center text-sm">
-										{ file.name.includes(' ') ? file.name :
-											file.name.length > 15 ? file.name.substring(0, 15) + '...' : file.name }
+										{file.name.includes(' ') ? file.name : file.name.length > 15 ? file.name.substring(0, 15) + '...' : file.name}
 									</span>
 								</div>
 							) : (
@@ -206,17 +201,20 @@ function App() {
 						)
 					) : (
 						<></>
-					) }
+					)}
 				</div>
-				{ files.length <= 0 ? (
-				<div className={ 'flex flex-col justify-center items-center pt-56' }>
-					<img width={ 100 } src={ libraryImage }/>
-					Empty Library
-				</div>) : <></>}
+				{files.length <= 0 ? (
+					<div className={'flex flex-col justify-center items-center pt-56'}>
+						<img width={100} src={libraryImage} />
+						Empty Library
+					</div>
+				) : (
+					<></>
+				)}
 			</div>
-			{ tasks.length > 0 ? (
+			{tasks.length > 0 ? (
 				<div className="text-neutral-300 w-80 p-6 bg-[#222] fixed bottom-10 rounded-xl right-4 border-2 border-[#1E1E1E]">
-				{tasks.map((task) => (
+					{tasks.map((task) => (
 						<>
 							<span>Downloading: {task}</span>
 							<br />
