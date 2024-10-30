@@ -1,95 +1,100 @@
-import './App.css'
+import "./App.css";
 
-import React, { ChangeEvent, useEffect, useState } from 'react'
-import { invoke } from '@tauri-apps/api/core'
-import { BaseDirectory, readDir } from '@tauri-apps/plugin-fs'
-import folderImage from './assets/folder.svg'
-import fileImage from './assets/fileImage.png'
-import { family } from '@tauri-apps/plugin-os'
-import { Menu, MenuItem, PredefinedMenuItem } from '@tauri-apps/api/menu'
-import libraryImage from './assets/libraryImage.png'
+import { invoke } from "@tauri-apps/api/core";
+import { Menu, MenuItem, PredefinedMenuItem } from "@tauri-apps/api/menu";
+import { BaseDirectory, readDir } from "@tauri-apps/plugin-fs";
+import { family } from "@tauri-apps/plugin-os";
+import type React from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
+import fileImage from "./assets/fileImage.png";
+import folderImage from "./assets/folder.svg";
+import libraryImage from "./assets/libraryImage.png";
 
 interface Topic {
 	item: {
-		topic: string
-		files: string[]
-	}
-	refIndex: number
+		topic: string;
+		files: string[];
+	};
+	refIndex: number;
 }
 
 interface File {
-	name: string
-	isDir: boolean
+	name: string;
+	isDir: boolean;
 }
 
 function App() {
-	const [completions, setCompletions] = useState<Topic[]>([])
-	const [value, setValue] = useState('')
-	const [files, setFiles] = useState<File[]>([])
-	const [currentDir, setCurrentDir] = useState('.vxfetch/')
-	const [tasks, setTasks] = useState<string[]>([])
-	const [dummy, setDummy] = useState('')
+	const [completions, setCompletions] = useState<Topic[]>([]);
+	const [value, setValue] = useState("");
+	const [files, setFiles] = useState<File[]>([]);
+	const [currentDir, setCurrentDir] = useState(".vxfetch/");
+	const [tasks, setTasks] = useState<string[]>([]);
+	const [dummy, setDummy] = useState("");
 
-	let slash: '/' | '\\' = '/'
+	let slash: "/" | "\\" = "/";
 	function onChange(e: ChangeEvent<HTMLInputElement>) {
-		setValue(e.target.value)
+		setValue(e.target.value);
 		if (value.length < 3) {
-			setCompletions([])
-			return
+			setCompletions([]);
+			return;
 		}
-		fetch('http://localhost:3000/search/?topic=' + value).then((res) =>
+		fetch(`http://localhost:3000/search/?topic=${value}`).then((res) =>
 			res.json().then((json) => {
-				if (!json.success) return
-				setCompletions(json.matches)
+				if (!json.success) return;
+				setCompletions(json.matches);
 			}),
-		)
+		);
 	}
 
 	function download(index: number) {
-		let topic = completions[index].item.topic
-		setCompletions([])
-		setValue('')
-		setTasks([...tasks, topic])
-		invoke('download_files', {
+		const topic = completions[index].item.topic;
+		setCompletions([]);
+		setValue("");
+		setTasks([...tasks, topic]);
+		invoke("download_files", {
 			topic: topic,
 			encodedTopic: encodeURI(topic),
 		}).then(() => {
 			try {
-				readDir(currentDir.replaceAll('/', slash), { baseDir: BaseDirectory.Home }).then((dir) => {
-					let newFiles = dir.map((entry) => ({
+				readDir(currentDir.replaceAll("/", slash), {
+					baseDir: BaseDirectory.Home,
+				}).then((dir) => {
+					const newFiles = dir.map((entry) => ({
 						name: entry.name,
 						isDir: entry.isDirectory,
-					}))
+					}));
 
-					setTasks(tasks.filter((task) => task !== topic))
-					setFiles(newFiles)
-				})
+					setTasks(tasks.filter((task) => task !== topic));
+					setFiles(newFiles);
+				});
 			} catch (error) {
-				setTasks(tasks.filter((task) => task !== topic))
-				console.error('error reading directory:', error)
+				setTasks(tasks.filter((task) => task !== topic));
+				console.error("error reading directory:", error);
 			}
-		})
+		});
 	}
 	useEffect(() => {
-		family().then((a) => (slash = a == 'unix' ? '/' : '\\'))
-		setCurrentDir('.vxfetch/')
-	}, [])
+		family().then((a) => (slash = a === "unix" ? "/" : "\\"));
+		setCurrentDir(".vxfetch/");
+	}, []);
 
 	useEffect(() => {
-		console.log(currentDir.replaceAll('vxfetch', '').replaceAll('/', ''))
+		console.log(currentDir.replaceAll("vxfetch", "").replaceAll("/", ""));
 		try {
-			readDir(currentDir.replaceAll('/', slash), { baseDir: BaseDirectory.Home }).then((dir) => {
-				let newFiles = dir.map((entry) => ({
+			readDir(currentDir.replaceAll("/", slash), {
+				baseDir: BaseDirectory.Home,
+			}).then((dir) => {
+				const newFiles = dir.map((entry) => ({
 					name: entry.name,
 					isDir: entry.isDirectory,
-				}))
+				}));
 
-				setFiles(newFiles)
-			})
+				setFiles(newFiles);
+			});
 		} catch (error) {
-			console.error('error reading directory:', error)
+			console.error("error reading directory:", error);
 		}
-	}, [currentDir, dummy])
+	}, [currentDir, dummy]);
 
 	return (
 		<>
@@ -97,7 +102,6 @@ function App() {
 				<div className="px-64">
 					<div className="relative pt-4 pb-8">
 						<input
-							autoFocus={true}
 							onChange={onChange}
 							type="text"
 							value={value}
@@ -107,7 +111,11 @@ function App() {
 						{completions.length > 1 ? (
 							<div className="bg-[#222] w-full text-sm p-3 mt-2 rounded-md focus:outline-none border-2 border-[#1E1E1E] absolute z-10">
 								{completions.map((completion, index) => (
-									<div className="cursor-pointer" onClick={() => download(index)}>
+									<div
+									key={index}
+										className="cursor-pointer"
+										onClick={() => download(index)}
+									>
 										{completion.item.topic}
 									</div>
 								))}
@@ -118,16 +126,26 @@ function App() {
 					</div>
 				</div>
 				<div className="px-5">
-					{files.length > 0 && currentDir.replaceAll('vxfetch', '').replaceAll('/', '').replaceAll('.', '') !== '' ? (
-						currentDir.split('/').map(
+					{files.length > 0 &&
+					currentDir
+						.replaceAll("vxfetch", "")
+						.replaceAll("/", "")
+						.replaceAll(".", "") !== "" ? (
+						currentDir.split("/").map(
 							(path) =>
-								path !== '' && (
+								path !== "" && (
 									<button
 										className="pr-2"
+										type="button"
 										onClick={() => {
-											setCurrentDir((path == '.vxfetch/' || path == '.vxfetch' ? '' : currentDir.split(path)[0]) + path)
-										}}>
-										{path == '' ? '' : path + '/'}
+											setCurrentDir(
+												(path === ".vxfetch/" || path === ".vxfetch"
+													? ""
+													: currentDir.split(path)[0]) + path,
+											);
+										}}
+									>
+										{path === "" ? "" : `${path}/`}
 									</button>
 								),
 						)
@@ -138,64 +156,97 @@ function App() {
 				<div className="grid justify-center gap-2 2xl:grid-cols-7 xl:grid-cols-6 lg:grid-cols-5 md:grid-cols-4 grid-cols-2 sm:grid-cols-3 pt-3 px-5 z-0">
 					{files.length > 0 ? (
 						files.map((file) =>
-							file.name !== '.DS_Store' && file.name !== 'config.toml' ? (
+							file.name !== ".DS_Store" && file.name !== "config.toml" ? (
 								<div
+									key={1}
 									className="items-center flex flex-col cursor-pointer text-center"
 									onContextMenu={async (e: React.MouseEvent) => {
-										e.preventDefault()
-										let filePath = currentDir.replaceAll('.vxfetch', '').replaceAll('/', slash) + slash + file.name
+										e.preventDefault();
+										const filePath =
+											currentDir
+												.replaceAll(".vxfetch", "")
+												.replaceAll("/", slash) +
+											slash +
+											file.name;
 										const menuItems = await Promise.all([
 											MenuItem.new({
-												text: 'Open',
+												text: "Open",
 												action: () => {
 													if (file.isDir) {
-														setCurrentDir(currentDir + slash + file.name)
-														return
+														setCurrentDir(currentDir + slash + file.name);
+														return;
 													}
-													invoke('open_file', {
-														file: currentDir.replace('.vxfetch/', '').replaceAll('/', slash) + slash + file.name,
-													})
+													invoke("open_file", {
+														file:
+															currentDir
+																.replace(".vxfetch/", "")
+																.replaceAll("/", slash) +
+															slash +
+															file.name,
+													});
 												},
 											}),
 											MenuItem.new({
-												text: 'Open in file system',
+												text: "Open in file system",
 												action: async () => {
-													let path = currentDir
-														.replace(/(\/\.vxfetch)+/g, '')
-														.replaceAll('.vxfetch', '')
-														.replaceAll('/', slash)
-													console.log(path)
-													invoke('open_file', { file: path + slash + file.name })
+													const path = currentDir
+														.replace(/(\/\.vxfetch)+/g, "")
+														.replaceAll(".vxfetch", "")
+														.replaceAll("/", slash);
+													console.log(path);
+													invoke("open_file", {
+														file: path + slash + file.name,
+													});
 												},
 											}),
-											PredefinedMenuItem.new({ item: 'Separator' }),
+											PredefinedMenuItem.new({ item: "Separator" }),
 											MenuItem.new({
-												text: 'Delete',
+												text: "Delete",
 												action: async () => {
-													invoke('delete_file', { filePath: filePath }).then(() => setDummy(Math.random().toString()))
+													invoke("delete_file", { filePath: filePath }).then(
+														() => setDummy(Math.random().toString()),
+													);
 												},
 											}),
-										])
+										]);
 
 										const menu = await Menu.new({
 											items: menuItems,
-										})
+										});
 
-										await menu.popup()
+										await menu.popup();
 									}}
 									onClick={() => {
 										if (file.isDir) {
-											setCurrentDir(currentDir + slash + file.name)
-											return
+											setCurrentDir(currentDir + slash + file.name);
+											return;
 										}
-										invoke('open_file', { file: currentDir.replace('.vxfetch/', '').replaceAll('/', slash) + slash + file.name })
-									}}>
-									<img draggable={false} src={file.isDir ? folderImage : fileImage} className="w-32" alt="folder icon" />
+										invoke("open_file", {
+											file:
+												currentDir
+													.replace(".vxfetch/", "")
+													.replaceAll("/", slash) +
+												slash +
+												file.name,
+										});
+									}}
+								>
+									<img
+										draggable={false}
+										src={file.isDir ? folderImage : fileImage}
+										className="w-32"
+										alt="folder icon"
+									/>
 									<span className="text-center text-sm">
-										{file.name.includes(' ') ? file.name : file.name.length > 15 ? file.name.substring(0, 15) + '...' : file.name}
+										{file.name.includes(" ")
+											? file.name
+											: file.name.length > 15
+												? `${file.name.substring(0, 15)}...`
+												: file.name}
 									</span>
 								</div>
 							) : (
+								// biome-ignore lint/correctness/useJsxKeyInIterable: no need since empty
 								<></>
 							),
 						)
@@ -204,8 +255,8 @@ function App() {
 					)}
 				</div>
 				{files.length <= 0 ? (
-					<div className={'flex flex-col justify-center items-center pt-56'}>
-						<img width={100} src={libraryImage} />
+					<div className={"flex flex-col justify-center items-center pt-56"}>
+						<img width={100} src={libraryImage} alt="empty library icon"/>
 						Empty Library
 					</div>
 				) : (
@@ -225,7 +276,7 @@ function App() {
 				<></>
 			)}
 		</>
-	)
+	);
 }
 
-export default App
+export default App;
