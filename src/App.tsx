@@ -8,6 +8,7 @@ import { type ChangeEvent, useEffect, useState } from "react";
 import fileImage from "./assets/fileImage.png";
 import folderImage from "./assets/folder.svg";
 import libraryImage from "./assets/libraryImage.png";
+//@ts-ignore
 import * as pdfjsLib from "pdfjs-dist/webpack";
 
 interface Topic {
