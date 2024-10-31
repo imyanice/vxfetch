@@ -115,7 +115,7 @@ function App() {
 			viewport: viewport,
 		};
 		await page.render(renderContext).promise;
-		return canvas.toDataURL();
+		return canvas.toDataURL("image/jpeg");
 	};
 
 	const handleFileClick = async (file: File) => {
@@ -270,9 +270,9 @@ function App() {
 								>
 									{file.name.endsWith(".pdf") ? (
 										<img
+											className="rounded-3xl w-32 p-4"
 											draggable={false}
 											src={pdfImages[file.name] || fileImage}
-											className="w-32 p-4"
 											alt="PDF preview"
 										/>
 									) : (
