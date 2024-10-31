@@ -1,14 +1,14 @@
 import "./App.css";
-
 import { invoke } from "@tauri-apps/api/core";
 import { Menu, MenuItem, PredefinedMenuItem } from "@tauri-apps/api/menu";
-import { BaseDirectory, readDir } from "@tauri-apps/plugin-fs";
+import { BaseDirectory, readDir, readFile } from "@tauri-apps/plugin-fs";
 import { family } from "@tauri-apps/plugin-os";
 import type React from "react";
 import { type ChangeEvent, useEffect, useState } from "react";
 import fileImage from "./assets/fileImage.png";
 import folderImage from "./assets/folder.svg";
 import libraryImage from "./assets/libraryImage.png";
+import * as pdfjsLib from "pdfjs-dist/webpack";
 
 interface Topic {
 	item: {
@@ -30,8 +30,10 @@ function App() {
 	const [currentDir, setCurrentDir] = useState(".vxfetch/");
 	const [tasks, setTasks] = useState<string[]>([]);
 	const [dummy, setDummy] = useState("");
+	const [pdfImages, setPdfImages] = useState<{ [key: string]: string }>({});
 
 	let slash: "/" | "\\" = "/";
+
 	function onChange(e: ChangeEvent<HTMLInputElement>) {
 		setValue(e.target.value);
 		if (value.length < 3) {
@@ -73,6 +75,7 @@ function App() {
 			}
 		});
 	}
+
 	useEffect(() => {
 		family().then((a) => (slash = a === "unix" ? "/" : "\\"));
 		setCurrentDir(".vxfetch/");
@@ -96,6 +99,52 @@ function App() {
 		}
 	}, [currentDir, dummy]);
 
+	const renderPDF = async (filePath: string) => {
+		const fileContent = await readFile(filePath, { baseDir: BaseDirectory.Home });
+		const loadingTask = pdfjsLib.getDocument({ data: fileContent });
+		const pdf = await loadingTask.promise;
+		const page = await pdf.getPage(1);
+		const viewport = page.getViewport({ scale: 1.0 });
+		const canvas = document.createElement("canvas");
+		const context = canvas.getContext("2d");
+		canvas.height = viewport.height;
+		canvas.width = viewport.width;
+
+		const renderContext = {
+			canvasContext: context,
+			viewport: viewport,
+		};
+		await page.render(renderContext).promise;
+		return canvas.toDataURL();
+	};
+
+	const handleFileClick = async (file: File) => {
+		if (file.isDir) {
+			setCurrentDir(currentDir + slash + file.name);
+			return;
+		}
+		
+			invoke("open_file", {
+				file:
+					currentDir
+						.replace(".vxfetch/", "")
+						.replaceAll("/", slash) +
+					slash +
+					file.name,
+			});
+		
+	};
+
+	const handlePDFRender = async (file: File) => {
+		if (!file.name.endsWith(".pdf")) return;
+		const filePath =
+				currentDir
+					.replaceAll("/", slash) +
+				slash +
+				file.name;
+			const pdfDataUrl = await renderPDF(filePath);
+			setPdfImages((prev) => ({ ...prev, [file.name]: pdfDataUrl }));
+	}
 	return (
 		<>
 			<div className="w-full text-neutral-300 relative">
@@ -112,7 +161,7 @@ function App() {
 							<div className="bg-[#222] w-full text-sm p-3 mt-2 rounded-md focus:outline-none border-2 border-[#1E1E1E] absolute z-10">
 								{completions.map((completion, index) => (
 									<div
-									key={index}
+										key={index}
 										className="cursor-pointer"
 										onClick={() => download(index)}
 									>
@@ -127,10 +176,10 @@ function App() {
 				</div>
 				<div className="px-5">
 					{files.length > 0 &&
-					currentDir
-						.replaceAll("vxfetch", "")
-						.replaceAll("/", "")
-						.replaceAll(".", "") !== "" ? (
+						currentDir
+							.replaceAll("vxfetch", "")
+							.replaceAll("/", "")
+							.replaceAll(".", "") !== "" ? (
 						currentDir.split("/").map(
 							(path) =>
 								path !== "" && (
@@ -158,7 +207,7 @@ function App() {
 						files.map((file) =>
 							file.name !== ".DS_Store" && file.name !== "config.toml" ? (
 								<div
-									key={1}
+									key={file.name}
 									className="items-center flex flex-col cursor-pointer text-center"
 									onContextMenu={async (e: React.MouseEvent) => {
 										e.preventDefault();
@@ -216,27 +265,24 @@ function App() {
 
 										await menu.popup();
 									}}
-									onClick={() => {
-										if (file.isDir) {
-											setCurrentDir(currentDir + slash + file.name);
-											return;
-										}
-										invoke("open_file", {
-											file:
-												currentDir
-													.replace(".vxfetch/", "")
-													.replaceAll("/", slash) +
-												slash +
-												file.name,
-										});
-									}}
+									onClick={() => handleFileClick(file)}
+									onLoad={() => handlePDFRender(file)}
 								>
-									<img
-										draggable={false}
-										src={file.isDir ? folderImage : fileImage}
-										className="w-32"
-										alt="folder icon"
-									/>
+									{file.name.endsWith(".pdf") ? (
+										<img
+											draggable={false}
+											src={pdfImages[file.name] || fileImage}
+											className="w-32 p-4"
+											alt="PDF preview"
+										/>
+									) : (
+										<img
+											draggable={false}
+											src={file.isDir ? folderImage : fileImage}
+											className="w-32"
+											alt="folder icon"
+										/>
+									)}
 									<span className="text-center text-sm">
 										{file.name.includes(" ")
 											? file.name
@@ -256,7 +302,7 @@ function App() {
 				</div>
 				{files.length <= 0 ? (
 					<div className={"flex flex-col justify-center items-center pt-56"}>
-						<img width={100} src={libraryImage} alt="empty library icon"/>
+						<img width={100} src={libraryImage} alt="empty library icon" />
 						Empty Library
 					</div>
 				) : (
